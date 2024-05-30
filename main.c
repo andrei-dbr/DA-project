@@ -109,9 +109,7 @@ void initialize_requests(MPI_Request *requests, size_t nr_of_requests) {
 }
 
 int elect_leader(node_config_t *config) {
-    int NUM_ROUNDS = 5;
-
-    printf("[NODE %d] entering leader election\n", config->node_id);
+    int NUM_ROUNDS = 8;
 
     if (!config || !config->neighbors_config) {
         MPI_Abort(MPI_COMM_WORLD, INVALID_INPUT);
@@ -193,6 +191,7 @@ int elect_leader(node_config_t *config) {
             if (recv_requests_count > 0) {
                 for (int i = 0; i < recv_requests_count; ++i) {
                     int index = indices[i];
+                    index += round * nr_of_neighbors;
                     if (received_info[index].processing_power > leader_info.processing_power) {
                         leader_info.processing_power = received_info[index].processing_power;
                         leader_info.node_id = received_info[index].node_id;
@@ -208,7 +207,7 @@ int elect_leader(node_config_t *config) {
                 timeout_reached = true;
             }
 
-           usleep(1000);
+           usleep(10000);
         }
     }
 
